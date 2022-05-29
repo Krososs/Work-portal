@@ -183,20 +183,20 @@ public class Web {
         }
 
     }
-
-    public static string LOGIN_ADDRESS=  "http://workportal-api.damol.pl/api/Auth/login";  
-    public static string REGISTER_ADDRESS=  "http://workportal-api.damol.pl/api/Auth/register";  
-    public static string LOGOUT_ADDRESS=  "http://workportal-api.damol.pl/api/Auth/logout?token=";
-    public static string GET_USER_INFO ="http://workportal-api.damol.pl/api/User/DEBUG/myUserInfo?token=";
+    public static string HOST_ADDRESS= "http://workportal-api.damol.pl";
+    public static string LOGIN_ADDRESS=  HOST_ADDRESS + "/api/Auth/login";  
+    public static string REGISTER_ADDRESS=  HOST_ADDRESS + "/api/Auth/register";  
+    public static string LOGOUT_ADDRESS=  HOST_ADDRESS + "/api/Auth/logout?token=";
+    public static string GET_USER_INFO =HOST_ADDRESS + "/api/User/DEBUG/myUserInfo?token=";
 
     /// CHAT
-    public static string CREATE_PRIVATE_CHAT=  "http://workportal-api.damol.pl/api/Chat/createPrivateChat?token=";
-    public static string GET_STATUS=  "http://workportal-api.damol.pl/api/Chat/getStatus?token=";
-    public static string SEND_MESSAGE="http://workportal-api.damol.pl/api/Chat/addMessage?token=";
-    public static string GET_USER_CHATS="http://workportal-api.damol.pl/api/Chat/getChatsForUser?token=";
+    public static string CREATE_PRIVATE_CHAT=  HOST_ADDRESS + "/api/Chat/createPrivateChat?token=";
+    public static string GET_STATUS=  HOST_ADDRESS + "/api/Chat/getStatus?token=";
+    public static string SEND_MESSAGE=HOST_ADDRESS + "/api/Chat/addMessage?token=";
+    public static string GET_USER_CHATS=HOST_ADDRESS + "/api/Chat/getChatsForUser?token=";
 
     public static string getMessages(string chatId, string token, string startUUID, string endUUID){
-        string address="http://workportal-api.damol.pl/api/Chat/getMessages?chatId="+chatId;
+        string address=HOST_ADDRESS + "/api/Chat/getMessages?chatId="+chatId;
         address+="&token="+token;
 
         if(startUUID!=null)
@@ -210,7 +210,7 @@ public class Web {
     }
     public static string setStatus(string chatId, string uuid, string token){
         
-        string address="http://workportal-api.damol.pl/api/Chat/setStatus?chatId=";
+        string address=HOST_ADDRESS + "/api/Chat/setStatus?chatId=";
         address+=chatId;
         if(uuid!=null)
             address+="&UUID="+uuid;
@@ -220,7 +220,7 @@ public class Web {
      }
 
     public static string findUser(string username, string token, string companyId, string departmentId){
-        string address ="http://workportal-api.damol.pl/api/User/find?token="+token;
+        string address =HOST_ADDRESS + "/api/User/find?token="+token;
         address+="&userName="+username;
 
         if(companyId!=null)
@@ -234,20 +234,20 @@ public class Web {
     //todo string builder
    
     //STATUS
-    public static string GET_STATUS_HISTORY ="http://workportal-api.damol.pl/api/Status?token=";
-    public static string GET_LAST_STATUS ="http://workportal-api.damol.pl/api/Status/last?token=";
+    public static string GET_STATUS_HISTORY =HOST_ADDRESS + "/api/Status?token=";
+    public static string GET_LAST_STATUS =HOST_ADDRESS + "/api/Status/last?token=";
 
     public static string getUserStatus(string token, string userId){
 
-        return "http://workportal-api.damol.pl/api/Status/"+userId+"?token="+token;
+        return HOST_ADDRESS + "/api/Status/"+userId+"?token="+token;
     }
 
     public static string setStatuss(string token, string statusType){
-        return "http://workportal-api.damol.pl/api/Status/setStatus?token="+token+"&statusTypeId="+statusType;
+        return HOST_ADDRESS + "/api/Status/setStatus?token="+token+"&statusTypeId="+statusType;
     }
 
     public static string export(string token, int month, int year, string userId){
-        string address="http://workportal-api.damol.pl/api/Status/export";
+        string address=HOST_ADDRESS + "/api/Status/export";
 
         if(userId!=null)
             address+="/"+userId;
@@ -258,10 +258,10 @@ public class Web {
     }
 
     //HOLIDAYS
-    public static string CREATE_REQUEST ="http://workportal-api.damol.pl/api/Vacation/createRequest?token="; //http://workportal-api.damol.pl/api/Vacation/createRequest?token=0a1b24b67fa247e185aaf4583c44f894
+    public static string CREATE_REQUEST =HOST_ADDRESS + "/api/Vacation/createRequest?token="; //http://workportal-api.damol.pl/api/Vacation/createRequest?token=0a1b24b67fa247e185aaf4583c44f894
     public static string ACCEPT_REQUEST="";
     public static string REJECT_REQUEST="";
-    public static string VACATION ="http://workportal-api.damol.pl/api/Vacation?token="; //http://workportal-api.damol.pl/api/Vacation?token=0a1b24b67fa247e185aaf4583c44f894  - moje requesty
+    public static string VACATION =HOST_ADDRESS + "/api/Vacation?token="; //http://workportal-api.damol.pl/api/Vacation?token=0a1b24b67fa247e185aaf4583c44f894  - moje requesty
     public static string PRIVILEGE_BASED="";
 
 }
