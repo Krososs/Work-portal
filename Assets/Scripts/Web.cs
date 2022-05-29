@@ -81,7 +81,7 @@ public class Web
     public static IEnumerator PutRequest(string uri, string messageData, REQUEST type)
     {
 
-        byte[] bytes = Encoding.ASCII.GetBytes(messageData);
+        byte[] bytes = Encoding.UTF8.GetBytes(messageData);
         UnityWebRequest www = UnityWebRequest.Put(uri, bytes);
         UploadHandler uploader = new UploadHandlerRaw(bytes);
 
@@ -195,6 +195,7 @@ public class Web
 
     }
     public static string HOST_ADDRESS = "http://workportal-api.damol.pl";
+    //public static string HOST_ADDRESS = "https://localhost:44338";
     public static string LOGIN_ADDRESS = HOST_ADDRESS + "/api/Auth/login";
     public static string REGISTER_ADDRESS = HOST_ADDRESS + "/api/Auth/register";
     public static string LOGOUT_ADDRESS = HOST_ADDRESS + "/api/Auth/logout?token=";
