@@ -8,9 +8,7 @@ using System.IO;
 
 public class Security : MonoBehaviour
 {
-
     private static string KEY ="11111111111111111111111111111111"; //32 x1
-
 
     public static string EncryptString(string text)  
     {  

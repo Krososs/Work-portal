@@ -9,7 +9,6 @@ using System.Text;
 
 public class Web
 {
-
     public enum REQUEST
     {
         ///GET
@@ -19,30 +18,44 @@ public class Web
         GET_STATUS,
         GET_SEARCH_RESULT,
         GET_USER_INFO,
-        GET_LAST_STATUS, //MAIN SCENE ?
-        //GET_USER_STATUS, //MAIN SCENE ?
-        //SET_USER_STATUS, //SET STATUS - //MAIN SCENE
+        GET_LAST_STATUS, 
+        GET_USER_ROLE,
+        GET_USERS,
+        GET_REQUESTS_FOR_APPROVE,
         GET_STATUS_HISTORY,
         EXPORT,
         GET_USER_REQUESTS,
+        GET_COMPANY_DEPARTMENTS,
+        GET_GIVEN_USER_INFO,
+        GET_COMPANIES,
         ////PUT
         SEND_MESSAGE,
         SEND_CHAT_STATUS,
         SEND_USER_STATUS,
         CREATE_REQUEST,
+        CREATE_USER,
+        SET_HEAD_OF_DEPARTMENT,
+        SET_COMPANY_OWNER,
+        //PATCH
+        EDIT_USER,
         ///POST
         CREATE_NEW_CHAT,
         LOGIN,
-        LOGOUT
-
-
+        LOGOUT,
+        CREATE_DEPARTMENT,
+        CREATE_COMPANY,
+        ACCEPT_REQUEST,
+        DISCARD_REQUEST,
+        //DELETE
+        DELETE_USER,
+        DELETE_DEPARTMENT,
+        DELETE_COMPANY
     }
-
 
     public static IEnumerator PostRequest(string uri, string n, REQUEST type)
     {
 
-        byte[] bytes = Encoding.ASCII.GetBytes(n);
+        byte[] bytes = Encoding.UTF8.GetBytes(n);
         UnityWebRequest www = UnityWebRequest.Post(uri, "");
         UploadHandler uploader = new UploadHandlerRaw(bytes);
         uploader.contentType = "application/json";
@@ -59,9 +72,19 @@ public class Web
             switch (type)
             {
                 case REQUEST.CREATE_NEW_CHAT:
-                    ChatScene.requestType = REQUEST.CREATE_NEW_CHAT;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.CREATE_NEW_CHAT,www.downloadHandler.text);
+                    break;
+                case REQUEST.CREATE_DEPARTMENT:
+                    WorkersScene.setRequestInfo(REQUEST.CREATE_DEPARTMENT,www.downloadHandler.text);
+                    break;
+                case REQUEST.CREATE_COMPANY:
+                    WorkersScene.setRequestInfo(REQUEST.CREATE_COMPANY,www.downloadHandler.text);
+                    break;
+                case REQUEST.ACCEPT_REQUEST:
+                    VacationsScene.setRequestInfo(REQUEST.ACCEPT_REQUEST,www.downloadHandler.text);
+                    break;
+                case REQUEST.DISCARD_REQUEST:
+                    VacationsScene.setRequestInfo(REQUEST.DISCARD_REQUEST,www.downloadHandler.text);
                     break;
                 case REQUEST.LOGIN:
                     LoginScene.ProcessLoginResponse(www.downloadHandler.text);
@@ -76,6 +99,73 @@ public class Web
 
         }
 
+    }
+
+    public static IEnumerator PatchRequest(string uri, string messageData, REQUEST type){
+
+        byte[] bytes = Encoding.UTF8.GetBytes(messageData);
+        UnityWebRequest www = UnityWebRequest.Put(uri, bytes);
+        www.method = "PATCH";
+        UploadHandler uploader = new UploadHandlerRaw(bytes);
+
+        uploader.contentType = "application/json";
+
+        www.uploadHandler = uploader;
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Something went wrong " + www.error);
+            Debug.LogError(www.downloadHandler.text);
+        }
+        else
+        {
+            switch (type)
+            {
+                case REQUEST.EDIT_USER:
+                    WorkersScene.setRequestInfo(REQUEST.EDIT_USER,www.downloadHandler.text);
+                    break;
+                default:
+                    Debug.LogError("Wrong request type PATCH!");
+                    break;
+            }
+        }
+    }
+    public static IEnumerator DeleteRequest(string uri, string messageData, REQUEST type){
+
+        byte[] bytes = Encoding.UTF8.GetBytes(messageData);
+        UnityWebRequest www = UnityWebRequest.Put(uri, bytes);
+        www.method = "DELETE";
+        UploadHandler uploader = new UploadHandlerRaw(bytes);
+
+        uploader.contentType = "application/json";
+
+        www.uploadHandler = uploader;
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Something went wrong " + www.error);
+            Debug.LogError(www.downloadHandler.text);
+        }
+        else
+        {
+            switch (type)
+            {
+                case REQUEST.DELETE_USER:
+                    WorkersScene.setRequestInfo(REQUEST.DELETE_USER,www.downloadHandler.text);
+                    break;
+                case REQUEST.DELETE_DEPARTMENT:
+                    WorkersScene.setRequestInfo(REQUEST.DELETE_DEPARTMENT,www.downloadHandler.text);
+                    break;
+                case REQUEST.DELETE_COMPANY:
+                    WorkersScene.setRequestInfo(REQUEST.DELETE_COMPANY,www.downloadHandler.text);
+                    break;
+                default:
+                    Debug.LogError("Wrong request type DELETE!");
+                    break;
+            }
+        }
     }
 
     public static IEnumerator PutRequest(string uri, string messageData, REQUEST type)
@@ -100,31 +190,35 @@ public class Web
             switch (type)
             {
                 case REQUEST.SEND_MESSAGE:
-                    ChatScene.requestType = REQUEST.SEND_MESSAGE;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.SEND_MESSAGE,www.downloadHandler.text);
                     break;
                 case REQUEST.SEND_CHAT_STATUS:
-                    ChatScene.requestType = REQUEST.SEND_CHAT_STATUS;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.SEND_CHAT_STATUS,www.downloadHandler.text);
                     break;
                 case REQUEST.SEND_USER_STATUS:
                     MainScene.ProcessSentStatus(www.downloadHandler.text);
                     break;
                 case REQUEST.CREATE_REQUEST:
-                    VacationsScene._requestType = REQUEST.CREATE_REQUEST;
-                    VacationsScene.newRequest = true;
-                    VacationsScene.requestMessage = www.downloadHandler.text;
+                    VacationsScene.setRequestInfo(REQUEST.CREATE_REQUEST,www.downloadHandler.text);
                     break;
+                case REQUEST.CREATE_USER:
+                    WorkersScene.setRequestInfo(REQUEST.CREATE_USER,www.downloadHandler.text);
+                    break;
+                case REQUEST.EDIT_USER:
+                    WorkersScene.setRequestInfo(REQUEST.EDIT_USER,www.downloadHandler.text);
+                    break;
+                case REQUEST.SET_HEAD_OF_DEPARTMENT:
+                    WorkersScene.setRequestInfo(REQUEST.SET_HEAD_OF_DEPARTMENT,www.downloadHandler.text);
+                    break;
+                case REQUEST.SET_COMPANY_OWNER:
+                    WorkersScene.setRequestInfo(REQUEST.SET_COMPANY_OWNER,www.downloadHandler.text);
+                    break;              
                 default:
-                    Debug.LogError("Wrong request type!");
+                    Debug.LogError("Wrong request type PUT!");
                     break;
             }
-
         }
     }
-
     public static IEnumerator GetRequest(string uri, REQUEST type)
     {
 
@@ -147,45 +241,47 @@ public class Web
                 case REQUEST.GET_LAST_STATUS:
                     MainScene.ProcessLasStatus(www.downloadHandler.text);
                     break;
+                case REQUEST.GET_USER_ROLE:
+                    MainScene.ProcessRoleInfo(www.downloadHandler.text);
+                    break;
                 case REQUEST.GET_USER_CHATS:
-                    ChatScene.requestType = REQUEST.GET_USER_CHATS;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.GET_USER_CHATS,www.downloadHandler.text);
                     break;
                 case REQUEST.GET_MESSAGES:
-                    ChatScene.requestType = REQUEST.GET_MESSAGES;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.GET_MESSAGES,www.downloadHandler.text);
                     break;
                 case REQUEST.GET_UNREAD_MESSAGES:
-                    ChatScene.requestType = REQUEST.GET_UNREAD_MESSAGES;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.GET_UNREAD_MESSAGES,www.downloadHandler.text);
                     break;
                 case REQUEST.GET_STATUS:
-                    ChatScene.requestType = REQUEST.GET_STATUS;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.GET_STATUS,www.downloadHandler.text);
                     break;
                 case REQUEST.GET_SEARCH_RESULT:
-                    ChatScene.requestType = REQUEST.GET_SEARCH_RESULT;
-                    ChatScene.newRequest = true;
-                    ChatScene.requestMessage = www.downloadHandler.text;
+                    ChatScene.setRequestInfo(REQUEST.GET_SEARCH_RESULT,www.downloadHandler.text);
                     break;
                 case REQUEST.GET_STATUS_HISTORY:
-                    StatusHistoryScene.requestType = REQUEST.GET_STATUS_HISTORY;
-                    StatusHistoryScene.newRequest = true;
-                    StatusHistoryScene.requestMessage = www.downloadHandler.text;
+                    StatusHistoryScene.setRequestInfo(REQUEST.GET_STATUS_HISTORY,www.downloadHandler.text);
                     break;
                 case REQUEST.EXPORT:
-                    StatusHistoryScene.requestType = REQUEST.EXPORT;
-                    StatusHistoryScene.newRequest = true;
-                    StatusHistoryScene.requestMessage = www.downloadHandler.text;
+                    StatusHistoryScene.setRequestInfo(REQUEST.EXPORT,www.downloadHandler.text);
                     break;
                 case REQUEST.GET_USER_REQUESTS:
-                    VacationsScene._requestType = REQUEST.GET_USER_REQUESTS;
-                    VacationsScene.newRequest = true;
-                    VacationsScene.requestMessage = www.downloadHandler.text;
+                    VacationsScene.setRequestInfo(REQUEST.GET_USER_REQUESTS,www.downloadHandler.text);
+                    break;
+                case REQUEST.GET_COMPANY_DEPARTMENTS:
+                    WorkersScene.setRequestInfo(REQUEST.GET_COMPANY_DEPARTMENTS,www.downloadHandler.text);
+                    break;
+                case REQUEST.GET_USERS:
+                    WorkersScene.setRequestInfo(REQUEST.GET_USERS,www.downloadHandler.text);
+                    break;
+                case REQUEST.GET_GIVEN_USER_INFO:
+                    WorkersScene.setRequestInfo(REQUEST.GET_GIVEN_USER_INFO,www.downloadHandler.text);
+                    break;
+                case REQUEST.GET_COMPANIES:
+                    WorkersScene.setRequestInfo(REQUEST.GET_COMPANIES,www.downloadHandler.text);
+                    break;
+                case REQUEST.GET_REQUESTS_FOR_APPROVE:
+                    VacationsScene.setRequestInfo(REQUEST.GET_REQUESTS_FOR_APPROVE,www.downloadHandler.text);
                     break;
                 default:
                     Debug.LogError("Wrong request type!");
@@ -195,12 +291,11 @@ public class Web
 
     }
     public static string HOST_ADDRESS = "http://workportal-api.damol.pl";
-    //public static string HOST_ADDRESS = "https://localhost:44338";
     public static string LOGIN_ADDRESS = HOST_ADDRESS + "/api/Auth/login";
     public static string REGISTER_ADDRESS = HOST_ADDRESS + "/api/Auth/register";
     public static string LOGOUT_ADDRESS = HOST_ADDRESS + "/api/Auth/logout?token=";
-    public static string GET_USER_INFO = HOST_ADDRESS + "/api/User/DEBUG/myUserInfo?token=";
-
+    public static string GET_USER_INFO = HOST_ADDRESS + "/api/User/myInfo?token="; 
+    public static string GET_USER_ROLE = HOST_ADDRESS + "/api/Role?token=";
     /// CHAT
     public static string CREATE_PRIVATE_CHAT = HOST_ADDRESS + "/api/Chat/createPrivateChat?token=";
     public static string GET_STATUS = HOST_ADDRESS + "/api/Chat/getStatus?token=";
@@ -219,7 +314,6 @@ public class Web
 
         address += "&n=20";
         return address;
-
     }
     public static string setStatus(string chatId, string uuid, string token)
     {
@@ -230,9 +324,7 @@ public class Web
             address += "&UUID=" + uuid;
         address += "&token=" + token;
         return address;
-
     }
-
     public static string findUser(string username, string token, string companyId, string departmentId)
     {
         string address = HOST_ADDRESS + "/api/User/find?token=" + token;
@@ -244,17 +336,12 @@ public class Web
             address += "&departamentId=" + departmentId;
 
         return address;
-
     }
-    //todo string builder
-
     //STATUS
     public static string GET_STATUS_HISTORY = HOST_ADDRESS + "/api/Status?token=";
     public static string GET_LAST_STATUS = HOST_ADDRESS + "/api/Status/last?token=";
-
     public static string getUserStatus(string token, string userId)
     {
-
         return HOST_ADDRESS + "/api/Status/" + userId + "?token=" + token;
     }
 
@@ -271,15 +358,65 @@ public class Web
             address += "/" + userId;
 
         address += "?token=" + token + "&month=" + month + "&year=" + year;
-
         return address;
     }
 
     //HOLIDAYS
-    public static string CREATE_REQUEST = HOST_ADDRESS + "/api/Vacation/createRequest?token="; //http://workportal-api.damol.pl/api/Vacation/createRequest?token=0a1b24b67fa247e185aaf4583c44f894
-    public static string ACCEPT_REQUEST = "";
-    public static string REJECT_REQUEST = "";
-    public static string VACATION = HOST_ADDRESS + "/api/Vacation?token="; //http://workportal-api.damol.pl/api/Vacation?token=0a1b24b67fa247e185aaf4583c44f894  - moje requesty
-    public static string PRIVILEGE_BASED = "";
+    public static string CREATE_REQUEST = HOST_ADDRESS + "/api/Vacation/createRequest?token=";
+    public static string VACATION = HOST_ADDRESS + "/api/Vacation?token=";
+    public static string GET_REQUESTS_FOR_APPROVE = HOST_ADDRESS + "/api/Vacation/getRequestsForApproverWithUserInfo?token=";
 
+    public static string acceptRequest(string token, string requestId){
+        return HOST_ADDRESS +"/api/Vacation/acceptRequest?token=" + token +"&requestId="+requestId;
+    }
+    public static string discardRequest(string token, string requestId){
+        return HOST_ADDRESS+"/api/Vacation/rejectRequest?token="+token+"&requestId="+requestId;
+    }
+
+    ///WORKERS 
+    //USER
+    public static string createUser(string token, string companyId, string departmentId, string roleId){
+        return HOST_ADDRESS + "/api/User/create?token="+token+"&companyId="+companyId+"&departamentId="+departmentId+"&roleType="+roleId;
+    }
+
+    public static string editUser(string token, string userId){
+        return  HOST_ADDRESS + "/api/User/edit/"+userId+"?token="+token;
+    }
+
+    public static string deleteUser(string token, string userId){
+        return HOST_ADDRESS + "/api/User/delete/"+userId+"?token="+token;
+    }
+
+    public static string getCompanyDepartments(string token, string companyId){
+        return HOST_ADDRESS + "/api/Department/"+companyId+"?token="+token;
+    }
+
+    public static string GET_USERS = HOST_ADDRESS +  "/api/User/info?token="; //users list
+
+    public static string getGivenUserInfo(string token, string userId){
+        return  HOST_ADDRESS +"/api/User/info/"+userId+"?token="+token;
+    }
+    //DEPARTMENT
+    public static string GET_COMPANIES = HOST_ADDRESS + "/api/Company/getAll?token=";
+    public static string CREATE_DEPARTMENT = HOST_ADDRESS+ "/api/Department/create?token=";
+
+    public static string setHeadOfDepartment(string token, string departamentId, string userId){
+        return HOST_ADDRESS +"/api/Department/SetHeadOfDepartament?departamentId="+departamentId+"&userId="+userId+"&token="+token;
+    }
+
+    public static string deleteDepartment(string token,string departamentId ){
+        return HOST_ADDRESS + "/api/Department/delete?departamentId="+departamentId+"&token="+token;
+    }
+    //COMPANY
+    public static string createCompany(string token, string companyName){
+        return HOST_ADDRESS +"/api/Company/create?Name="+companyName+"&token="+token;
+    }
+
+    public static string setCompanyOwner(string token, string companyId, string userId){
+        return HOST_ADDRESS + "/api/Company/SetCompanyOwner?companyId="+companyId+"&userId="+userId+"&token="+token;
+    }
+
+    public static string deleteCompany(string token, string companyId){
+        return HOST_ADDRESS + "/api/Company/delete?companyId="+companyId+"&token="+token;
+    }
 }

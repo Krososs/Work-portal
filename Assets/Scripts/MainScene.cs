@@ -13,12 +13,17 @@ public class MainScene : MonoBehaviour
     
     public Text username;
     public GameObject Slider;
+    public GameObject workersButton;
 
 
     public static string email;
     public static string password;
     public static string token;
     public static string userId;
+    public static int userRole;
+    public static int companyId;
+    public static int departamentId;
+    public static bool isAdmin;
     private static int currentStatus;
 
     public Button workButton;
@@ -27,6 +32,7 @@ public class MainScene : MonoBehaviour
 
    
     void Start(){
+        Debug.Log(token);
         username.text=email;  
         getUserInfo();
         getLastStatus();
@@ -41,17 +47,40 @@ public class MainScene : MonoBehaviour
         if(currentStatus==1)
             workButton.interactable=false;
         else
-            workButton.interactable=true;       
+            workButton.interactable=true;
+
+        if(userRole==3 || userRole == 2){
+            workersButton.gameObject.SetActive(false);
+        }       
     }
 
+    
+
     private void getUserInfo(){
-         StartCoroutine(Web.GetRequest(Web.GET_USER_INFO+token,Web.REQUEST.GET_USER_INFO));
+        StartCoroutine(Web.GetRequest(Web.GET_USER_INFO+token,Web.REQUEST.GET_USER_INFO));
+        StartCoroutine(Web.GetRequest(Web.GET_USER_ROLE+token,Web.REQUEST.GET_USER_ROLE));
     }
  
     public static void ProcessUserInfo(string rawRespone){
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         userId=data["result"]["id"];
+        Debug.Log("USER_INFO");
+        Debug.Log(data);
     }
+
+    public static void ProcessRoleInfo(string rawRespone){
+        JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
+        Debug.Log("ROLE_INFO");
+        Debug.Log(data);
+        userRole=data["result"]["role"];
+        companyId=data["result"]["companyId"];
+        departamentId=data["result"]["departamentId"];
+        isAdmin=data["result"]["isAdmin"];
+
+        
+
+    }
+
 
     public static void ProcessLasStatus(string rawRespone){
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);   

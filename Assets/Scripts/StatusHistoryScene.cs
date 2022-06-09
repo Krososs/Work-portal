@@ -69,8 +69,7 @@ public class StatusHistoryScene : MonoBehaviour
         getCurrentDate();
         exportMonth=1;
         exportYear=currentYear;
-        getStatusHistory();
-                
+        getStatusHistory();             
     }
 
     void Update()
@@ -82,8 +81,13 @@ public class StatusHistoryScene : MonoBehaviour
         if(newRequest){
             newRequest=false;
             ProcessNewRequest(requestType,requestMessage);
-
         }    
+    }
+
+    public static void setRequestInfo(Web.REQUEST type, string rawRespone){
+        newRequest=true;
+        requestMessage=rawRespone;
+        requestType=type;
     }
 
     private void ProcessNewRequest(Web.REQUEST type, string rawRespone){
@@ -130,14 +134,9 @@ public class StatusHistoryScene : MonoBehaviour
 
     private void getCurrentDate(){
         System.DateTime localDate =  System.DateTime.Now;
-
         currentDay=localDate.Day;
         currentMonth=localDate.Month;
         currentYear=localDate.Year;
-        //daysInCurrentMonth=System.DateTime.DaysInMonth(currentYear, currentMonth);
-        //Debug.Log("Days in current month: " + daysInCurrentMonth);
-        //Debug.Log("Day in week: " +localDate.DayOfWeek);
-
     }
 
     private bool dayHasStatus(int _day){
@@ -170,10 +169,8 @@ public class StatusHistoryScene : MonoBehaviour
             statusCounter-=6;
             float width = statussesContainer.GetComponent<RectTransform>().rect.width;
             float height = statussesContainer.GetComponent<RectTransform>().rect.height;
-            statussesContainer.GetComponent<RectTransform>().sizeDelta=new Vector2(width, height+(statusCounter*100)); //initial size + (resultCounter * userPan
-            
+            statussesContainer.GetComponent<RectTransform>().sizeDelta=new Vector2(width, height+(statusCounter*100));   
         }
-
     }
 
     private void addBlankDay(GameObject w){
@@ -228,7 +225,6 @@ public class StatusHistoryScene : MonoBehaviour
                 break;
         }
         return status;
-
     }
 
     private void loadMonth(int year, int month){
@@ -241,7 +237,6 @@ public class StatusHistoryScene : MonoBehaviour
         int firstDayInMonth= Date.getDayInWeek(date.DayOfWeek.ToString());
         int daysInMonth=System.DateTime.DaysInMonth(year, month);
         
-
         bool printEnabled=false;
 
         for(int i=0; i<6; i++){
@@ -271,7 +266,6 @@ public class StatusHistoryScene : MonoBehaviour
 
     public void showExportPanel(){
         exportPanel.gameObject.SetActive(true);
-
     }
 
     public void closeExportPanel(){

@@ -14,7 +14,9 @@ public class VacationsScene : MonoBehaviour
 
     public GameObject requestsContainer;
     public GameObject requestPanel;
+    public GameObject workerRequestPanel;
     public GameObject text;
+    public GameObject requestIdText;
     public GameObject requestData;
 
     public GameObject newRequestPanel;
@@ -28,6 +30,13 @@ public class VacationsScene : MonoBehaviour
     public Dropdown end_day;
     public Dropdown end_month;
     public Dropdown end_year;
+
+    public Button workersRequestsButton;
+    public Button acceptButton;
+    public Button discardButton;
+
+    public GameObject acceptPanel;
+    public GameObject discardPanel;
 
     Vector2 initialRequestContainerSize;
 
@@ -58,19 +67,31 @@ public class VacationsScene : MonoBehaviour
         newRequestPanel.gameObject.SetActive(false);
         error.gameObject.SetActive(false);  
         requestType=1; //default   
-        //MainScene.token="9af81b93082743e5b3cfa0710cb7fca4";
+        MainScene.token="00ca68f8f5874f8a9740ff7184cd8f59";
+        MainScene.userRole=1;
+        MainScene.isAdmin=true;
         initialRequestContainerSize=new Vector2(requestsContainer.GetComponent<RectTransform>().rect.width,requestsContainer.GetComponent<RectTransform>().rect.height);
         getUserRequests();     
     }
 
-    // Update is called once per frame
     void Update()
     {
         if(newRequest){
             newRequest=false;
             ProcessNewRequest(_requestType,requestMessage);
-        }  
-        
+        }
+
+        if(MainScene.userRole==2 || MainScene.userRole==1 || MainScene.isAdmin){
+            workersRequestsButton.gameObject.SetActive(true);
+        }else{
+            workersRequestsButton.gameObject.SetActive(false);
+        }         
+    }
+
+    public static void setRequestInfo(Web.REQUEST type, string rawRespone){
+        newRequest=true;
+        requestMessage=rawRespone;
+        _requestType=type;
     }
 
     private void ProcessNewRequest(Web.REQUEST type, string rawRespone){
@@ -82,6 +103,15 @@ public class VacationsScene : MonoBehaviour
             case Web.REQUEST.CREATE_REQUEST:
                 ProcessRequestResponse(rawRespone);
                 break;
+            case Web.REQUEST.GET_REQUESTS_FOR_APPROVE:
+                ProcessRequestsToApproveResponse(rawRespone);
+                break;
+            case Web.REQUEST.ACCEPT_REQUEST:
+                 ProcessAcceptRequestResponse(rawRespone);
+                 break;
+            case Web.REQUEST.DISCARD_REQUEST:
+                ProcessDiscardRequestResponse(rawRespone);
+                break;
             default:
                 Debug.LogError("Wrong request type!");
                 break; 
@@ -89,7 +119,27 @@ public class VacationsScene : MonoBehaviour
 
     }
 
-   
+    private void ProcessAcceptRequestResponse(string rawResponse){
+        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
+        Debug.Log("ACCEPTED");
+        Debug.Log(data);
+
+    }
+
+    private void ProcessDiscardRequestResponse(string rawResponse){
+        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
+        Debug.Log("REJECTED");
+        Debug.Log(data);
+    }
+
+    private void ProcessRequestsToApproveResponse(string rawResponse){
+        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
+        Debug.Log("REQUESTS TO APPROVE");
+        Debug.Log(data);
+        showWorkersRequests(data);
+
+    }
+
     private void ProcessRequestResponse(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
         getUserRequests();
@@ -103,6 +153,7 @@ public class VacationsScene : MonoBehaviour
     private void getUserRequests(){
         StartCoroutine(Web.GetRequest(Web.VACATION+MainScene.token,Web.REQUEST.GET_USER_REQUESTS));
     }
+    
     private void showUserRequests(JSONNode data){
         clearUserRequests();
         int requestCounter=0;
@@ -133,9 +184,57 @@ public class VacationsScene : MonoBehaviour
             float height = requestsContainer.GetComponent<RectTransform>().rect.height;
             requestsContainer.GetComponent<RectTransform>().sizeDelta=new Vector2(width, height+(requestCounter*200)+(requestCounter*12));
             requestData.GetComponentInChildren<Scrollbar>().value=1;
+        }
+    }
 
+    public void getWorkersRequests(){
+        StartCoroutine(Web.GetRequest(Web.GET_REQUESTS_FOR_APPROVE+MainScene.token,Web.REQUEST.GET_REQUESTS_FOR_APPROVE));
+    }
+
+    private void showWorkersRequests(JSONNode data){
+
+        clearUserRequests();
+        int requestCounter=0;
+        foreach(KeyValuePair<string,JSONNode> entry in data["result"]){
+
+            if(entry.Value["state"]==1){
+                requestCounter++;
+                GameObject panel = Instantiate(workerRequestPanel, new Vector3(0,0,0), Quaternion.identity);
+                GameObject text1 = Instantiate(text, new Vector3(0,0,0), Quaternion.identity);
+                GameObject text2 = Instantiate(text, new Vector3(0,0,0), Quaternion.identity);
+
+                GameObject requestId = Instantiate(requestIdText, new Vector3(0,0,0), Quaternion.identity);
+                GameObject _requestId = Instantiate(requestIdText, new Vector3(0,0,0), Quaternion.identity);
+
+                GameObject accept = Instantiate(acceptPanel, new Vector3(0,0,0), Quaternion.identity);
+                GameObject discard = Instantiate(discardPanel, new Vector3(0,0,0), Quaternion.identity);
+
+
+                text1.GetComponent<Text>().text =entry.Value["id"]+". "+vacationTypeToString(entry.Value["type"]) +" ("+entry.Value["firstName"]+" "+entry.Value["lastName"]+")";
+                text2.GetComponent<Text>().text ="Start: "+Date.dateTimeToString(entry.Value["startDate"]) +" - "+"End: "+ Date.dateTimeToString(entry.Value["endDate"]); //Start: 2022.05.19   End: 2022.05.19
+                requestId.GetComponent<Text>().text = entry.Value["id"];
+                _requestId.GetComponent<Text>().text = entry.Value["id"];
+
+                text1.transform.SetParent(panel.transform,false);
+                text2.transform.SetParent(panel.transform,false);
+
+                requestId.transform.SetParent(accept.transform,false);
+                _requestId.transform.SetParent(discard.transform,false);
+
+                accept.transform.SetParent(panel.transform,false);
+                discard.transform.SetParent(panel.transform,false);
+
+                panel.transform.SetParent(requestsContainer.transform,false);
+            }
         }
 
+        if(requestCounter>3){
+            requestCounter-=3;
+            float width = requestsContainer.GetComponent<RectTransform>().rect.width;
+            float height = requestsContainer.GetComponent<RectTransform>().rect.height;
+            requestsContainer.GetComponent<RectTransform>().sizeDelta=new Vector2(width, height+(requestCounter*200)+(requestCounter*12));
+            requestData.GetComponentInChildren<Scrollbar>().value=1;
+        }
     }
 
     private static string vacationTypeToString(int type){
@@ -162,7 +261,6 @@ public class VacationsScene : MonoBehaviour
             default:
                 return "Null";
         }
-
     }
 
     private static string statusToString(int status){
@@ -177,7 +275,6 @@ public class VacationsScene : MonoBehaviour
             default:
                 return "Null";
         }
-
     }
 
     private void setYears(int year, Dropdown dropdown){
@@ -213,8 +310,6 @@ public class VacationsScene : MonoBehaviour
         dropdown.AddOptions(days);
     }
 
-   
-
     public void showRequestPanel(){
         newRequestPanel.gameObject.SetActive(true);
 
@@ -235,13 +330,10 @@ public class VacationsScene : MonoBehaviour
     }
 
     private void clearUserRequests(){
-
         for(int i=requestsContainer.transform.childCount-1; i>=0; i--){
             DestroyImmediate(requestsContainer.transform.GetChild(i).gameObject);
         }
-        //set initialSize
         requestsContainer.GetComponent<RectTransform>().sizeDelta=initialRequestContainerSize;
-
     }
 
     public void submitRequest(){
@@ -260,7 +352,6 @@ public class VacationsScene : MonoBehaviour
 
             StartCoroutine(Web.PutRequest(Web.CREATE_REQUEST+MainScene.token, JsonUtility.ToJson(request), Web.REQUEST.CREATE_REQUEST));
         }
-
     }
 
     public void hideRequestPanel(){
@@ -310,7 +401,6 @@ public class VacationsScene : MonoBehaviour
             startDay=System.DateTime.Now.Day;
         }
         setDays(startDay,System.DateTime.DaysInMonth(startYear, startMonth),start_day);
-
     }
 
      public void setEndMonth(int value){
@@ -328,13 +418,11 @@ public class VacationsScene : MonoBehaviour
 
     public void setStartDay(int value){
         startDay= Int32.Parse(start_day.options[start_day.value].text);
-
     }
 
     public void setEndDay(int value){
         endDay= Int32.Parse(end_day.options[end_day.value].text);
     }
-
 
     public void Back(){
 

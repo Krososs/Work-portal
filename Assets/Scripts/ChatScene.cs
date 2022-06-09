@@ -75,7 +75,6 @@ public class ChatScene : MonoBehaviour
         public string content;
         public string uuid;
     }
-
     [Serializable]
     public class Message
     {
@@ -83,7 +82,6 @@ public class ChatScene : MonoBehaviour
         public string userId;
         public string content;
     }
-
     [Serializable]
     public class Status
     {
@@ -91,7 +89,6 @@ public class ChatScene : MonoBehaviour
         public string UUID;
         public string token;
     }
-
     [Serializable]
     public class Chat
     {
@@ -147,7 +144,6 @@ public class ChatScene : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
-
             Message message = new Message();
             message.chatId = chatId;
             message.userId = MainScene.userId;
@@ -167,6 +163,12 @@ public class ChatScene : MonoBehaviour
         if (_searchInput.isFocused)
             search.gameObject.SetActive(true);
 
+    }
+
+    public static void setRequestInfo(Web.REQUEST type, string rawRespone){
+        newRequest=true;
+        requestMessage=rawRespone;
+        requestType=type;
     }
 
     private void ProcessNewRequest(Web.REQUEST type, string rawRespone)
@@ -260,8 +262,6 @@ public class ChatScene : MonoBehaviour
         choosenChatId = data["result"]["secondUserId"]; // ??
         clearChat();
         StartCoroutine(Web.GetRequest(Web.GET_USER_CHATS + MainScene.token, Web.REQUEST.GET_USER_CHATS));
-        //clear user chats
-        //load again
     }
 
     void ProcessChatsResponse(string rawRespone)
@@ -314,9 +314,7 @@ public class ChatScene : MonoBehaviour
             container.transform.SetParent(usersContainer.transform, false);
 
             chatsCounter++;
-
         }
-
         if (chatsCounter > 8)
         {
 
@@ -351,16 +349,13 @@ public class ChatScene : MonoBehaviour
 
         foreach (KeyValuePair<string, System.DateTime> entry in timeStamps.OrderBy(key => key.Value))
         {
-
             foreach (KeyValuePair<string, JSONNode> entry2 in data["result"])
             {
-
                 System.DateTime date = System.DateTime.Parse(entry2.Value["timestamp"], System.Globalization.CultureInfo.GetCultureInfo("en-us"));
                 if (entry.Value == date)
                 {
                     newMessages[entry2.Value["uuid"]] = entry2;
                 }
-
             }
         }
 
@@ -379,14 +374,8 @@ public class ChatScene : MonoBehaviour
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         foreach (KeyValuePair<string, JSONNode> entry in data["result"])
         {
-
-            if (entry.Value["upToDate"])
+            if (!entry.Value["upToDate"])
             {
-
-            }
-            else
-            {
-
                 if (entry.Key == chatId)
                 {
                     StartCoroutine(Web.GetRequest(Web.getMessages(chatId, MainScene.token, endUUID, null), Web.REQUEST.GET_UNREAD_MESSAGES));
@@ -396,7 +385,6 @@ public class ChatScene : MonoBehaviour
                     showNotification(entry.Key.ToString());
                 }
             }
-
         }
     }
 
@@ -512,7 +500,7 @@ public class ChatScene : MonoBehaviour
         float width = chatContainer.GetComponent<RectTransform>().rect.width;
         float height = chatContainer.GetComponent<RectTransform>().rect.height;
 
-        chatContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height + getContainerHeight(container) + 20.00F); // current height + message_height + 10.00F
+        chatContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height + getContainerHeight(container) + 20.00F); 
         chatPanel.GetComponentInChildren<Scrollbar>().value = -5;
 
     }
@@ -524,7 +512,7 @@ public class ChatScene : MonoBehaviour
         {
             if (chatId == usersContainer.transform.GetChild(i).GetChild(4).transform.GetComponent<Text>().text)
             {
-                usersContainer.transform.GetChild(i).GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f); // remvoe DOT 
+                usersContainer.transform.GetChild(i).GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f); 
 
             }
         }
@@ -533,10 +521,9 @@ public class ChatScene : MonoBehaviour
 
     void hideAllNotfications()
     {
-
         for (int i = usersContainer.transform.childCount - 1; i >= 0; i--)
         {
-            usersContainer.transform.GetChild(i).GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f); // remvoe DOT                          
+            usersContainer.transform.GetChild(i).GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);                        
         }
     }
 
@@ -547,26 +534,22 @@ public class ChatScene : MonoBehaviour
         {
             if (chatId == usersContainer.transform.GetChild(i).GetChild(4).transform.GetComponent<Text>().text)
             {
-                usersContainer.transform.GetChild(i).GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f); // add DOT
+                usersContainer.transform.GetChild(i).GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
     }
 
     void clearChat()
     {
-
         for (int i = chatContainer.transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(chatContainer.transform.GetChild(i).gameObject);
         }
-
         chatContainer.GetComponent<RectTransform>().sizeDelta = initialChatSize;
-
     }
 
     void clearSearchResults()
     {
-
         for (int i = searchContainer.transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(searchContainer.transform.GetChild(i).gameObject);
@@ -580,9 +563,7 @@ public class ChatScene : MonoBehaviour
         {
             DestroyImmediate(usersContainer.transform.GetChild(i).gameObject);
         }
-
         usersContainer.GetComponent<RectTransform>().sizeDelta = initialUsersSize;
-
     }
 
     float getContainerHeight(GameObject container)
@@ -592,7 +573,6 @@ public class ChatScene : MonoBehaviour
 
     void setMessageContainerSize(int charsCount, GameObject container)
     {
-
         Vector2 containerSize = container.GetComponent<RectTransform>().sizeDelta;
 
         float width = container.GetComponent<RectTransform>().rect.width;
@@ -608,10 +588,12 @@ public class ChatScene : MonoBehaviour
 
     bool chatExists()
     {
-
         foreach (KeyValuePair<string, JSONNode> entry in userChats)
         {
-            if ((entry.Value["chat"]["firstUserId"].ToString() == MainScene.userId && entry.Value["chat"]["secondUserId"].ToString() == choosenUserId) || (entry.Value["chat"]["firstUserId"].ToString() == choosenUserId && entry.Value["chat"]["secondUserId"].ToString() == MainScene.userId))
+            if ( 
+                (entry.Value["chat"]["firstUserId"].ToString() == MainScene.userId && entry.Value["chat"]["secondUserId"].ToString() == choosenUserId) 
+                || (entry.Value["chat"]["firstUserId"].ToString() == choosenUserId && entry.Value["chat"]["secondUserId"].ToString() == MainScene.userId)
+            )
             {
                 chatId = entry.Value["chat"]["id"].ToString();
                 return true;
@@ -622,7 +604,6 @@ public class ChatScene : MonoBehaviour
 
     void createNewChat()
     {
-
         Chat chat = new Chat();
         chat.firstUserId = MainScene.userId;
         chat.secondUserId = choosenUserId;
@@ -644,7 +625,6 @@ public class ChatScene : MonoBehaviour
 
     void loadMessages()
     {
-
         _messages.Clear();
         hideNotification(chatId);
         loadMessagesHistory(chatId);
@@ -656,7 +636,6 @@ public class ChatScene : MonoBehaviour
 
         if (Directory.Exists("Chats") && chatId.Length > 0)
         {
-
             if (File.Exists(@"Chats/chat_" + chatId.ToString() + ".json"))
             {
                 string[] lines = File.ReadAllLines(@"Chats/chat_" + chatId.ToString() + ".json");
@@ -673,9 +652,7 @@ public class ChatScene : MonoBehaviour
                     _messages[data["uuid"]] = data;
                     startUUID = data["uuid"];
                 }
-
             }
-
         }
     }
 
