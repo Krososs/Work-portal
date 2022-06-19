@@ -6093,7 +6093,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1.66, y: 0.9}
+  m_AnchoredPosition: {x: -1.65, y: 0.88}
   m_SizeDelta: {x: 416.14014, y: 567.95}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &520720829
@@ -7962,7 +7962,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -18830,7 +18830,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5869005e1f2a1094782f53fa8103425a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buttonsPanel: {fileID: 0}
   addWorkerButton: {fileID: 711059709}
   removeWorkerButton: {fileID: 1159039353}
   editWorkerButton: {fileID: 1240785810}

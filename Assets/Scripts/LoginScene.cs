@@ -69,6 +69,10 @@ public class LoginScene : MonoBehaviour
         MainScene.token=node["result"];
         SceneManager.LoadScene(1);
     }
+    
+    public void Exit(){
+        Application.Quit();
+    }
 
 
     

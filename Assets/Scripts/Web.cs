@@ -27,6 +27,7 @@ public class Web
         GET_USER_REQUESTS,
         GET_COMPANY_DEPARTMENTS,
         GET_GIVEN_USER_INFO,
+        GET_GIVEN_USER_INFO_CHAT,
         GET_COMPANIES,
         ////PUT
         SEND_MESSAGE,
@@ -51,6 +52,8 @@ public class Web
         DELETE_DEPARTMENT,
         DELETE_COMPANY
     }
+
+
 
     public static IEnumerator PostRequest(string uri, string n, REQUEST type)
     {
@@ -222,6 +225,7 @@ public class Web
     public static IEnumerator GetRequest(string uri, REQUEST type)
     {
 
+        
         UnityWebRequest www = UnityWebRequest.Get(uri);
         yield return www.SendWebRequest();
 
@@ -277,6 +281,10 @@ public class Web
                 case REQUEST.GET_GIVEN_USER_INFO:
                     WorkersScene.setRequestInfo(REQUEST.GET_GIVEN_USER_INFO,www.downloadHandler.text);
                     break;
+                case REQUEST.GET_GIVEN_USER_INFO_CHAT:{
+                    ChatScene.setRequestInfo(REQUEST.GET_GIVEN_USER_INFO_CHAT,www.downloadHandler.text);
+                    break;
+                }
                 case REQUEST.GET_COMPANIES:
                     WorkersScene.setRequestInfo(REQUEST.GET_COMPANIES,www.downloadHandler.text);
                     break;
@@ -400,8 +408,8 @@ public class Web
     public static string GET_COMPANIES = HOST_ADDRESS + "/api/Company/getAll?token=";
     public static string CREATE_DEPARTMENT = HOST_ADDRESS+ "/api/Department/create?token=";
 
-    public static string setHeadOfDepartment(string token, string departamentId, string userId){
-        return HOST_ADDRESS +"/api/Department/SetHeadOfDepartament?departamentId="+departamentId+"&userId="+userId+"&token="+token;
+    public static string setHeadOfDepartment(string token, string companyId, string departamentId, string userId){
+        return HOST_ADDRESS +"/api/Department/SetHeadOfDepartament?companyId=" +companyId+ "&departamentId="+departamentId+"&userId="+userId+"&token="+token;
     }
 
     public static string deleteDepartment(string token,string departamentId ){

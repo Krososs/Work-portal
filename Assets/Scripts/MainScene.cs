@@ -39,6 +39,12 @@ public class MainScene : MonoBehaviour
     }
 
     void Update(){
+        if(currentStatus==3){
+            quitButton.interactable=false;
+        }
+        else{
+            quitButton.interactable=true;
+        }
         if(currentStatus==3 || currentStatus==2)
             breakButton.interactable=false;
         else
@@ -83,8 +89,13 @@ public class MainScene : MonoBehaviour
 
 
     public static void ProcessLasStatus(string rawRespone){
-        JSONNode data = SimpleJSON.JSON.Parse(rawRespone);   
+        JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
+        Debug.Log("STATUS");
+        Debug.Log(data["result"]["type"]);   
         currentStatus=data["result"]["type"];
+        
+        if(currentStatus==null)
+            currentStatus=3;
     }
 
     public static void ProcessSentStatus(string rawRespone){

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +24,7 @@ public class ChatScene : MonoBehaviour
     public GameObject searchPanel;
     public GameObject searchContainer;
     public InputField _searchInput;
+    private bool fristSearch;
 
     //chat
     public GameObject chatContainer;
@@ -42,9 +44,9 @@ public class ChatScene : MonoBehaviour
     public GameObject usernameContent;
     public GameObject companyContent;
     public GameObject userId;
-    Dictionary<int, int> users = new Dictionary<int, int>(); // number on list / user id
+    private int currentId;
+    Dictionary<int, string> users = new Dictionary<int, string>(); // id / firstname + surname
     Dictionary<string, JSONNode> _messages = new Dictionary<string, JSONNode>();
-
 
     //chat
     Vector2 initialChatSize;
@@ -66,6 +68,7 @@ public class ChatScene : MonoBehaviour
     private string startUUID;
     private string endUUID;
     private float timeToRefresh;
+    private bool usersLoaded=false;
 
     [Serializable]
     public class historyMessage
@@ -102,8 +105,9 @@ public class ChatScene : MonoBehaviour
         search.gameObject.SetActive(false);
         choosenUserId = "";
         choosenChatId = "";
-        // MainScene.token="8bbf324b1cc94ed99fe711b904d386c4";
-        // MainScene.userId="8"; 
+        // MainScene.token="5634992f9e354cb489fd5e9728be555b";
+        // MainScene.userId="13"; 
+        fristSearch=true;
         timeToRefresh = 2;
         startUUID = null;
         endUUID = null;
@@ -160,8 +164,22 @@ public class ChatScene : MonoBehaviour
             timeToRefresh = 2;
         }
 
-        if (_searchInput.isFocused)
+        if (_searchInput.isFocused){
             search.gameObject.SetActive(true);
+            if(fristSearch){
+                //puste zapytanie
+                StartCoroutine(Web.GetRequest(Web.findUser(_searchInput.text.ToString(), MainScene.token, null, null), Web.REQUEST.GET_SEARCH_RESULT));
+                fristSearch=false;
+            }
+
+        }else{
+            fristSearch=true;
+        }
+
+        // if(usersLoaded){
+        //     usersLoaded=false;
+        //     
+        // }
 
     }
 
@@ -210,6 +228,7 @@ public class ChatScene : MonoBehaviour
     void ProcessSearchResultResponse(string rawRespone)
     {
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
+        Debug.Log("Search result");
 
         clearSearchResults();
 
@@ -269,10 +288,13 @@ public class ChatScene : MonoBehaviour
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         userChats = SimpleJSON.JSON.Parse(rawRespone)["result"];
         int chatsCounter = 0;
+        
         clearUserChats();
         foreach (KeyValuePair<string, JSONNode> entry in data["result"])
         {
-
+            
+            Debug.Log("CHAT");
+            Debug.Log(entry);
             string chatName = "";
             string companyName = "";
             string departamentName = "";
@@ -280,13 +302,19 @@ public class ChatScene : MonoBehaviour
             int usersCounter = 0;
             foreach (KeyValuePair<string, JSONNode> user in entry.Value["description"]["users"])
             {
-                chatName += user.Value["firstName"] + " " + user.Value["surname"] + " ";
-                companyName = user.Value["companyName"];
-                departamentName = user.Value["departmentName"];
+                
+                if(user.Value["id"].ToString()!=MainScene.userId){
+                    Debug.Log("Inny user");
+                    Debug.Log(user.Value["id"]);
+                    Debug.Log(MainScene.userId);
+                    chatName = user.Value["firstName"] + " " + user.Value["surname"] + " ";
+                    companyName = user.Value["companyName"];
+                    departamentName = user.Value["departmentName"];
+                }
                 usersCounter++;
             }
 
-            if (usersCounter > 1)
+            if (usersCounter > 2)
             {
                 chatName = "Group chat";
             }
@@ -330,8 +358,13 @@ public class ChatScene : MonoBehaviour
 
     void ProcessMessagesResponse(string rawRespone)
     {
+        Debug.Log("MESSAGES");
+        Debug.Log(SimpleJSON.JSON.Parse(rawRespone));
+
         saveMessages(SimpleJSON.JSON.Parse(rawRespone));
-        showMessages(SimpleJSON.JSON.Parse(rawRespone));
+        loadUsersInfo(SimpleJSON.JSON.Parse(rawRespone));
+        showMessages();
+
     }
 
     void ProccessUnreadMessagesResponse(string rawRespone)
@@ -402,13 +435,22 @@ public class ChatScene : MonoBehaviour
     {
     }
 
-    void showMessages(JSONNode messages)
+    void loadUsersInfo(JSONNode messages){
+
+        foreach (KeyValuePair<string, JSONNode> entry in messages["result"]["description"]["users"]){
+            users[entry.Value["id"]]=entry.Value["firstName"]+" "+entry.Value["surname"];
+        }
+     
+    }
+
+    void showMessages()
     {
 
         clearChat();
         float allMessagesHeight = 0.0F;
         string m;
         int counter = 0;
+
         foreach (KeyValuePair<string, JSONNode> entry in _messages)
         {
 
@@ -417,20 +459,19 @@ public class ChatScene : MonoBehaviour
             GameObject chatName = Instantiate(usernameContent, new Vector3(0, 0, 0), Quaternion.identity);
             GameObject container = Instantiate(messageContainer, new Vector3(0, 0, 0), Quaternion.identity);
 
-            if (entry.Value["userId"] == MainScene.userId)
+            if (entry.Value["userId"].ToString() == MainScene.userId)
             {
                 container.GetComponent<Image>().color = new Color(0.329f, 0.339f, 0.358f, 1.0f);
-                chatName.GetComponent<Text>().text = "Me";
+                chatName.GetComponent<Text>().text = users[entry.Value["userId"]];
             }
             else
             {
                 container.GetComponent<Image>().color = new Color(0.329f, 0.339f, 0.358f, 1.0f);
-                chatName.GetComponent<Text>().text = choosenChatName;
+                chatName.GetComponent<Text>().text = users[entry.Value["userId"]];
             }
 
             m = entry.Value["content"];
             message.GetComponent<Text>().text = m;
-            string[] lines = message.GetComponent<Text>().text.Split('\n');
             setMessageContainerSize(m.Length, container);
             setMessageContainerSize(m.Length, message);
 
@@ -453,7 +494,7 @@ public class ChatScene : MonoBehaviour
 
         Dictionary<string, JSONNode> tempMessages = new Dictionary<string, JSONNode>();
 
-        foreach (KeyValuePair<string, JSONNode> entry in messages["result"])
+        foreach (KeyValuePair<string, JSONNode> entry in messages["result"]["messages"])
             tempMessages[entry.Value["uuid"]] = entry;
 
         Dictionary<string, JSONNode> reversedMessages = new Dictionary<string, JSONNode>();
@@ -480,12 +521,12 @@ public class ChatScene : MonoBehaviour
         if (_message["userId"].ToString() == MainScene.userId)
         {
             container.GetComponent<Image>().color = new Color(0.329f, 0.339f, 0.358f, 1.0f);
-            chatName.GetComponent<Text>().text = "Me";
+            chatName.GetComponent<Text>().text = users[_message["userId"]];
         }
         else
         {
             container.GetComponent<Image>().color = new Color(0.329f, 0.339f, 0.358f, 1.0f);
-            chatName.GetComponent<Text>().text = choosenChatName;
+            chatName.GetComponent<Text>().text = users[_message["userId"]];
         }
 
         message.GetComponent<Text>().text = _message["content"];

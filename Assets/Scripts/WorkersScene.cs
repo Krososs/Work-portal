@@ -104,10 +104,10 @@ public class WorkersScene : MonoBehaviour
 
     void Start()
     {       
-        MainScene.token="dd9d724ae28f453e8c551c8cbb4f6c9e";
-        MainScene.companyId=1;
-        MainScene.userRole=1;
-        MainScene.isAdmin=true;
+        // MainScene.token="2eec3c1e330e4255acdf31a7f73856e0";
+        // MainScene.companyId=1;
+        // MainScene.userRole=1;
+        // MainScene.isAdmin=true;
         hideAll();
         showButtons();
         getCompanyDepartments();      
@@ -188,6 +188,7 @@ public class WorkersScene : MonoBehaviour
 
     private void getCompanyDepartments(){
         StartCoroutine(Web.GetRequest(Web.getCompanyDepartments(MainScene.token, MainScene.companyId.ToString()),Web.REQUEST.GET_COMPANY_DEPARTMENTS));
+       
     }
 
     private int getDepartmentId(string departmentName){
@@ -305,13 +306,16 @@ public class WorkersScene : MonoBehaviour
     }
 
     private void ProcessNewDepartmentResponse(string rawResponse){
+        getCompanyDepartments();
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
         Debug.Log(data);
     }
 
     private void ProcessCompanies(string rawResponse){      
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
+        Debug.Log("COMPANIES");
         Debug.Log(data);
+        
 
         foreach(KeyValuePair<string,JSONNode> entry in data["result"]){
             companies[entry.Value["id"]]=entry.Value["name"];
@@ -370,6 +374,7 @@ public class WorkersScene : MonoBehaviour
 
     private void ProcessCompanyDepartments(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
+        Debug.Log("DEPARTMENTS");
         Debug.Log(data);
 
         foreach(KeyValuePair<string,JSONNode> entry in data["result"]){
@@ -441,8 +446,21 @@ public class WorkersScene : MonoBehaviour
         dropdown.AddOptions(values);
     }
 
+    private void closePanels(){
+        newWorkerPanel.gameObject.SetActive(false);
+        editWorkerPanel.gameObject.SetActive(false);
+        removeWorkerPanel.gameObject.SetActive(false);
+        newDepartmentPanel.gameObject.SetActive(false);
+        departmentHeadPanel.gameObject.SetActive(false);
+        deleteDepartmentPanel.gameObject.SetActive(false);
+        createCompanyPanel.gameObject.SetActive(false);
+        companyOwnerPanel.gameObject.SetActive(false);
+        deleteCompanyPanel.gameObject.SetActive(false);
+    }
+
     //NewWorkerPanel
     public void showNewWorkerPanel(){
+        closePanels();
         newWorkerPanel.gameObject.SetActive(true);
 
     }
@@ -470,6 +488,7 @@ public class WorkersScene : MonoBehaviour
 
     //EditWorkerPanel
     public void showEditWorkerPanel(){
+        closePanels();
         editWorkerPanel.gameObject.SetActive(true);
         StartCoroutine(Web.GetRequest(Web.GET_USERS+MainScene.token,Web.REQUEST.GET_USERS));
     }
@@ -480,23 +499,29 @@ public class WorkersScene : MonoBehaviour
 
         User user = new User();
 
-        if(_firstName.text.Length>0)
+        if(_firstName.text.Length>0){
             user.firstName=_firstName.text;
-        else
-            user.firstName=null;
-        if(_surname.text.Length>0)
+        }
+        else{
+             user.firstName=_firstName.placeholder.GetComponent<Text>().text;
+        }
+        if(_surname.text.Length>0){
             user.surname=_surname.text;
-        else
-            user.surname=null;
-        if(_email.text.Length>0)
+        }   
+        else{
+            user.surname=_surname.placeholder.GetComponent<Text>().text;
+        }
+        if(_email.text.Length>0){
             user.email=_email.text;
-        else
-            user.email=null;
-       
+        }
+        else{
+            user.email=_email.placeholder.GetComponent<Text>().text;
+        }
+
         string userFullName=usersDropdown.options[usersDropdown.value].text;
         string userId = getUserId(userFullName).ToString();
 
-        StartCoroutine(Web.PatchRequest(Web.editUser(MainScene.token, userId), JsonUtility.ToJson(user), Web.REQUEST.CREATE_USER));
+        StartCoroutine(Web.PatchRequest(Web.editUser(MainScene.token, userId), JsonUtility.ToJson(user), Web.REQUEST.EDIT_USER));
     }
 
     //RemoveWorkerPanel
@@ -506,6 +531,7 @@ public class WorkersScene : MonoBehaviour
         StartCoroutine(Web.DeleteRequest(Web.deleteUser(MainScene.token,userId ), "e", Web.REQUEST.DELETE_USER));
     }
     public void showRemoveWorkerPanel(){
+        closePanels();
         removeWorkerPanel.gameObject.SetActive(true);
         StartCoroutine(Web.GetRequest(Web.GET_USERS+MainScene.token,Web.REQUEST.GET_USERS));
     }
@@ -528,6 +554,7 @@ public class WorkersScene : MonoBehaviour
         StartCoroutine(Web.PostRequest(Web.CREATE_DEPARTMENT+MainScene.token,JsonUtility.ToJson(department),Web.REQUEST.CREATE_DEPARTMENT));
     }
     public void showNewDepartmentPanel(){
+        closePanels();
         newDepartmentPanel.gameObject.SetActive(true);
         StartCoroutine(Web.GetRequest(Web.GET_COMPANIES+MainScene.token,Web.REQUEST.GET_COMPANIES));
     }
@@ -544,10 +571,11 @@ public class WorkersScene : MonoBehaviour
         string depName=_departmentsDropdown.options[_departmentsDropdown.value].text;
         string departamentId=getDepartmentId(depName).ToString();
   
-        StartCoroutine(Web.PutRequest(Web.setHeadOfDepartment(MainScene.token,departamentId,userId),"e",Web.REQUEST.SET_HEAD_OF_DEPARTMENT));
+        StartCoroutine(Web.PutRequest(Web.setHeadOfDepartment(MainScene.token,MainScene.companyId.ToString(),departamentId,userId),"e",Web.REQUEST.SET_HEAD_OF_DEPARTMENT));
     }
 
     public void showDepartmentHeadPanel(){
+        closePanels();
         departmentHeadPanel.gameObject.SetActive(true);
         StartCoroutine(Web.GetRequest(Web.GET_USERS+MainScene.token,Web.REQUEST.GET_USERS));
     }
@@ -563,6 +591,7 @@ public class WorkersScene : MonoBehaviour
         StartCoroutine(Web.DeleteRequest(Web.deleteDepartment(MainScene.token,departamentId ), "e", Web.REQUEST.DELETE_DEPARTMENT));
     }
     public void showDeleteDepartmentPanel(){
+        closePanels();
         deleteDepartmentPanel.gameObject.SetActive(true);
     }
     public void closeDeleteDepartmentPanel(){
@@ -577,6 +606,7 @@ public class WorkersScene : MonoBehaviour
         
     }
     public void showCreateCompanyPanel(){
+        closePanels();
         createCompanyPanel.gameObject.SetActive(true);
     }
     public void closeCreateCompanyPanel(){
@@ -594,6 +624,7 @@ public class WorkersScene : MonoBehaviour
         StartCoroutine(Web.PutRequest(Web.setCompanyOwner(MainScene.token,companyId,userId ), "e", Web.REQUEST.SET_COMPANY_OWNER));
     }
     public void showCompanyOwnerPanel(){
+        closePanels();
         companyOwnerPanel.gameObject.SetActive(true);
         StartCoroutine(Web.GetRequest(Web.GET_USERS+MainScene.token,Web.REQUEST.GET_USERS));
         StartCoroutine(Web.GetRequest(Web.GET_COMPANIES+MainScene.token,Web.REQUEST.GET_COMPANIES));
@@ -610,6 +641,7 @@ public class WorkersScene : MonoBehaviour
     }
 
     public void showDeleteCompanyPanel(){
+        closePanels();
         deleteCompanyPanel.gameObject.SetActive(true);
         StartCoroutine(Web.GetRequest(Web.GET_COMPANIES+MainScene.token,Web.REQUEST.GET_COMPANIES));
     }

@@ -53,6 +53,7 @@ public class VacationsScene : MonoBehaviour
     public static string requestMessage;
 
     private int requestType;
+    private bool myRequests;
 
     private int startYear;
     private int startMonth;
@@ -67,9 +68,10 @@ public class VacationsScene : MonoBehaviour
         newRequestPanel.gameObject.SetActive(false);
         error.gameObject.SetActive(false);  
         requestType=1; //default   
-        MainScene.token="00ca68f8f5874f8a9740ff7184cd8f59";
-        MainScene.userRole=1;
-        MainScene.isAdmin=true;
+        myRequests=true; //my requests
+        // MainScene.token="00ca68f8f5874f8a9740ff7184cd8f59";
+        // MainScene.userRole=1;
+        // MainScene.isAdmin=true;
         initialRequestContainerSize=new Vector2(requestsContainer.GetComponent<RectTransform>().rect.width,requestsContainer.GetComponent<RectTransform>().rect.height);
         getUserRequests();     
     }
@@ -121,15 +123,12 @@ public class VacationsScene : MonoBehaviour
 
     private void ProcessAcceptRequestResponse(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log("ACCEPTED");
-        Debug.Log(data);
-
+        StartCoroutine(Web.GetRequest(Web.GET_REQUESTS_FOR_APPROVE+MainScene.token,Web.REQUEST.GET_REQUESTS_FOR_APPROVE));     
     }
 
     private void ProcessDiscardRequestResponse(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log("REJECTED");
-        Debug.Log(data);
+        StartCoroutine(Web.GetRequest(Web.GET_REQUESTS_FOR_APPROVE+MainScene.token,Web.REQUEST.GET_REQUESTS_FOR_APPROVE));
     }
 
     private void ProcessRequestsToApproveResponse(string rawResponse){
@@ -188,7 +187,19 @@ public class VacationsScene : MonoBehaviour
     }
 
     public void getWorkersRequests(){
-        StartCoroutine(Web.GetRequest(Web.GET_REQUESTS_FOR_APPROVE+MainScene.token,Web.REQUEST.GET_REQUESTS_FOR_APPROVE));
+
+        if(myRequests){
+            //button text = My requests
+            myRequests=false;
+            workersRequestsButton.GetComponentInChildren<Text>().text ="My requests";
+            StartCoroutine(Web.GetRequest(Web.GET_REQUESTS_FOR_APPROVE+MainScene.token,Web.REQUEST.GET_REQUESTS_FOR_APPROVE));
+        }
+        else{
+            myRequests=true;
+            //button text = Workers requests
+            workersRequestsButton.GetComponentInChildren<Text>().text ="Workers requests";
+            StartCoroutine(Web.GetRequest(Web.VACATION+MainScene.token,Web.REQUEST.GET_USER_REQUESTS));
+        }
     }
 
     private void showWorkersRequests(JSONNode data){
