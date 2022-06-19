@@ -21,6 +21,7 @@ public class Web
         GET_LAST_STATUS, 
         GET_USER_ROLE,
         GET_USERS,
+        GET_STATISTICS,
         GET_REQUESTS_FOR_APPROVE,
         GET_STATUS_HISTORY,
         EXPORT,
@@ -248,6 +249,9 @@ public class Web
                 case REQUEST.GET_USER_ROLE:
                     MainScene.ProcessRoleInfo(www.downloadHandler.text);
                     break;
+                case REQUEST.GET_STATISTICS:
+                    MainScene.ProcessStatistics(www.downloadHandler.text);
+                    break;
                 case REQUEST.GET_USER_CHATS:
                     ChatScene.setRequestInfo(REQUEST.GET_USER_CHATS,www.downloadHandler.text);
                     break;
@@ -304,6 +308,12 @@ public class Web
     public static string LOGOUT_ADDRESS = HOST_ADDRESS + "/api/Auth/logout?token=";
     public static string GET_USER_INFO = HOST_ADDRESS + "/api/User/myInfo?token="; 
     public static string GET_USER_ROLE = HOST_ADDRESS + "/api/Role?token=";
+
+    public static string getStatistics(string token, string year, string month){
+        return HOST_ADDRESS + "/api/User/getStatistics/"+year+"/"+month+"?token="+token;
+        //http://workportal-api.damol.pl/api/User/getStatistics/1/1?token=1
+        
+    }
     /// CHAT
     public static string CREATE_PRIVATE_CHAT = HOST_ADDRESS + "/api/Chat/createPrivateChat?token=";
     public static string GET_STATUS = HOST_ADDRESS + "/api/Chat/getStatus?token=";

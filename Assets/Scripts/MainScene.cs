@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,10 @@ public class MainScene : MonoBehaviour
     public GameObject Slider;
     public GameObject workersButton;
 
+    public Text stats1;
+    public Text stats2;
+    public Text stats3;
+
 
     public static string email;
     public static string password;
@@ -25,6 +30,9 @@ public class MainScene : MonoBehaviour
     public static int departamentId;
     public static bool isAdmin;
     private static int currentStatus;
+    private static JSONNode statistics;
+    private static bool statisticsReady=false;
+    private static bool updateStatistics=false;
 
     public Button workButton;
     public Button breakButton;
@@ -57,7 +65,28 @@ public class MainScene : MonoBehaviour
 
         if(userRole==3 || userRole == 2){
             workersButton.gameObject.SetActive(false);
-        }       
+        }
+
+        if(statisticsReady){
+            statisticsReady=false;
+            setStatistics();
+        }    
+
+        if(updateStatistics){
+            updateStatistics=false;
+            StartCoroutine(Web.GetRequest(Web.getStatistics(token,"2022","6"),Web.REQUEST.GET_STATISTICS));
+            
+        }   
+    }
+
+    private void setStatistics(){
+         
+        double h = statistics["result"]["sumOfWorkTime"];
+        double min = statistics["result"]["sumOfWorkTime"] %1.0;
+
+        stats1.text= "Work time: " + Math.Floor(h)+" hours " + Math.Floor(min*60.0) +" mins"; // /100 *60
+        stats2.text= "Working days: " + statistics["result"]["workingDays"];
+        stats3.text= "Vacation days: " + statistics["result"]["vacationDays"];
     }
 
     
@@ -65,6 +94,7 @@ public class MainScene : MonoBehaviour
     private void getUserInfo(){
         StartCoroutine(Web.GetRequest(Web.GET_USER_INFO+token,Web.REQUEST.GET_USER_INFO));
         StartCoroutine(Web.GetRequest(Web.GET_USER_ROLE+token,Web.REQUEST.GET_USER_ROLE));
+        StartCoroutine(Web.GetRequest(Web.getStatistics(token,"2022","6"),Web.REQUEST.GET_STATISTICS));
     }
  
     public static void ProcessUserInfo(string rawRespone){
@@ -72,6 +102,17 @@ public class MainScene : MonoBehaviour
         userId=data["result"]["id"];
         Debug.Log("USER_INFO");
         Debug.Log(data);
+    }
+
+    public static void ProcessStatistics(string rawRespone){
+
+        JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
+        statistics=data;
+        statisticsReady=true;
+        Debug.Log("STATISTICS");
+        
+
+
     }
 
     public static void ProcessRoleInfo(string rawRespone){
@@ -99,7 +140,7 @@ public class MainScene : MonoBehaviour
     }
 
     public static void ProcessSentStatus(string rawRespone){
-       
+        updateStatistics=true;     
     }
 
     public static void ProcessLogoutResponse(string rawRespone){
