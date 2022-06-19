@@ -160,7 +160,7 @@ public class ChatScene : MonoBehaviour
         else
         {
             getStatus();
-            saveMessagesHistory();
+            //saveMessagesHistory();
             timeToRefresh = 2;
         }
 
@@ -229,6 +229,7 @@ public class ChatScene : MonoBehaviour
     {
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         Debug.Log("Search result");
+        Debug.Log(data);
 
         clearSearchResults();
 
@@ -236,30 +237,33 @@ public class ChatScene : MonoBehaviour
         foreach (KeyValuePair<string, JSONNode> entry in data["result"])
         {
 
-            GameObject username = Instantiate(usernameContent, new Vector3(0, 0, 0), Quaternion.identity);
-            GameObject company = Instantiate(companyContent, new Vector3(0, 0, 0), Quaternion.identity);
-            GameObject department = Instantiate(companyContent, new Vector3(0, 0, 0), Quaternion.identity);
-            GameObject chatid = Instantiate(userId, new Vector3(0, 0, 0), Quaternion.identity);
-            GameObject _userid = Instantiate(userId, new Vector3(0, 0, 0), Quaternion.identity); //
-            GameObject container = Instantiate(usersPanel, new Vector3(0, 0, 0), Quaternion.identity);
-            container.GetComponent<Image>().color = new Color(0.227f, 0.27f, 0.36f, 1.0f);
+            if(entry.Value["id"].ToString()!=MainScene.userId){
 
-            username.GetComponent<Text>().text = entry.Value["firstName"] + " " + entry.Value["surname"];
-            company.GetComponent<Text>().text = "Company -" + entry.Value["companyName"];
-            department.GetComponent<Text>().text = "Department -" + entry.Value["departamentName"];
-            _userid.GetComponent<Text>().text = entry.Value["id"];
-            chatid.GetComponent<Text>().text = "";
+                GameObject username = Instantiate(usernameContent, new Vector3(0, 0, 0), Quaternion.identity);
+                GameObject company = Instantiate(companyContent, new Vector3(0, 0, 0), Quaternion.identity);
+                GameObject department = Instantiate(companyContent, new Vector3(0, 0, 0), Quaternion.identity);
+                GameObject chatid = Instantiate(userId, new Vector3(0, 0, 0), Quaternion.identity);
+                GameObject _userid = Instantiate(userId, new Vector3(0, 0, 0), Quaternion.identity); //
+                GameObject container = Instantiate(usersPanel, new Vector3(0, 0, 0), Quaternion.identity);
+                container.GetComponent<Image>().color = new Color(0.227f, 0.27f, 0.36f, 1.0f);
 
-            username.transform.SetParent(container.transform, false);
-            company.transform.SetParent(container.transform, false);
-            department.transform.SetParent(container.transform, false);
-            chatid.transform.SetParent(container.transform, false);
-            _userid.transform.SetParent(container.transform, false);
+                username.GetComponent<Text>().text = entry.Value["firstName"] + " " + entry.Value["surname"];
+                company.GetComponent<Text>().text = "Company -" + entry.Value["companyName"];
+                department.GetComponent<Text>().text = "Department -" + entry.Value["departmentName"];
+                _userid.GetComponent<Text>().text = entry.Value["id"];
+                chatid.GetComponent<Text>().text = "";
 
-            container.transform.GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
-            container.transform.SetParent(searchContainer.transform, false);
+                username.transform.SetParent(container.transform, false);
+                company.transform.SetParent(container.transform, false);
+                department.transform.SetParent(container.transform, false);
+                chatid.transform.SetParent(container.transform, false);
+                _userid.transform.SetParent(container.transform, false);
 
-            resultCounter++;
+                container.transform.GetChild(0).transform.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                container.transform.SetParent(searchContainer.transform, false);
+
+                resultCounter++;
+            }
         }
         if (resultCounter > 4)
         {
@@ -374,15 +378,20 @@ public class ChatScene : MonoBehaviour
         Dictionary<string, JSONNode> newMessages = new Dictionary<string, JSONNode>();
         Dictionary<string, System.DateTime> timeStamps = new Dictionary<string, System.DateTime>();
 
-        foreach (KeyValuePair<string, JSONNode> entry in data["result"])
+        Debug.Log("UNREAD MESSAGES");
+        Debug.Log(data);
+
+        foreach (KeyValuePair<string, JSONNode> entry in data["result"]["messages"])
         {
+            
             System.DateTime date = System.DateTime.Parse(entry.Value["timestamp"], System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+            Debug.Log(date);
             timeStamps[entry.Value["uuid"]] = date;
         }
 
         foreach (KeyValuePair<string, System.DateTime> entry in timeStamps.OrderBy(key => key.Value))
         {
-            foreach (KeyValuePair<string, JSONNode> entry2 in data["result"])
+            foreach (KeyValuePair<string, JSONNode> entry2 in data["result"]["messages"])
             {
                 System.DateTime date = System.DateTime.Parse(entry2.Value["timestamp"], System.Globalization.CultureInfo.GetCultureInfo("en-us"));
                 if (entry.Value == date)
