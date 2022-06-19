@@ -17,8 +17,7 @@ public class Date : MonoBehaviour
 
         string d=Date.Year+"-";
         d+= Date.Month < 10 ? "0"+Date.Month.ToString() : Date.Month.ToString();
-        d+="-"+Date.Day;
-
+        d+= Date.Day < 10 ? "0"+Date.Day.ToString() : Date.Day.ToString();
         return d;
     }
 
