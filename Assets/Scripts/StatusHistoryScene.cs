@@ -62,8 +62,6 @@ public class StatusHistoryScene : MonoBehaviour
     void Start()
     {   
         exportPanel.gameObject.SetActive(false);
-        //MainScene.token="8599cb5ef6e5493d94ccf40e9e05440e";
-        //MainScene.userId="8";
         showDetails=false;
         initialStatussContainerSize =new Vector2(statussesContainer.GetComponent<RectTransform>().rect.width,statussesContainer.GetComponent<RectTransform>().rect.height);
         getCurrentDate();
@@ -110,7 +108,6 @@ public class StatusHistoryScene : MonoBehaviour
         StartCoroutine(Web.GetRequest(Web.GET_STATUS_HISTORY+MainScene.token, Web.REQUEST.GET_STATUS_HISTORY));
     }
  
-   
     private void ProcessExport(string rawRespone){
 
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
@@ -128,7 +125,6 @@ public class StatusHistoryScene : MonoBehaviour
             System.DateTime date = System.DateTime.Parse(entry.Value["timestamp"],System.Globalization.CultureInfo.GetCultureInfo("en-us"));
             statuses.Add(new Status(){month=date.Month, day=date.Day, hour=date.Hour, minute=date.Minute, type=entry.Value["type"]});       
         }
-
         loadMonth(currentYear, currentMonth);
     }
 
@@ -141,8 +137,7 @@ public class StatusHistoryScene : MonoBehaviour
 
     private bool dayHasStatus(int _day){
         foreach(Status s in statuses)
-            if(s.month == currentMonth && s.day ==_day) return true;
-             
+            if(s.month == currentMonth && s.day ==_day) return true;         
         return false;
     }
 

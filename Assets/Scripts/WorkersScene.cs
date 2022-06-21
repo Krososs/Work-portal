@@ -79,41 +79,36 @@ public class WorkersScene : MonoBehaviour
     Dictionary<int, string> companyDepartments = new Dictionary<int, string>();
     Dictionary<int, string> workers = new Dictionary<int, string>();
     Dictionary<int, string> roles= new Dictionary<int, string>()
-        {
-            [1] = "Company owner",
-            [2] = "Head of department" ,
-            [3] = "Worker"
-        };
+    {
+        [1] = "Company owner",
+        [2] = "Head of department" ,
+        [3] = "Worker"
+    };
 
-        [Serializable]   
-        public class User
-        {
-            public string firstName=null;
-            public string surname=null; 
-            public string email=null; 
-            public string password=null;
-            public string language="Polish"; 
+    [Serializable]   
+    public class User
+    {
+        public string firstName=null;
+        public string surname=null; 
+        public string email=null; 
+        public string password=null;
+        public string language="Polish"; 
 
-        }
-        [Serializable]
-        public class Department
-        {
-            public string companyId;
-            public string name;
-        }
+    }
+    [Serializable]
+    public class Department
+    {
+        public string companyId;
+        public string name;
+    }
 
     void Start()
     {       
-        // MainScene.token="2eec3c1e330e4255acdf31a7f73856e0";
-        // MainScene.companyId=1;
-        // MainScene.userRole=1;
-        // MainScene.isAdmin=true;
         hideAll();
         showButtons();
         getCompanyDepartments();      
     }
-
-    // Update is called once per frame
+ 
     void Update()
     {      
         if(newRequest){
@@ -280,113 +275,72 @@ public class WorkersScene : MonoBehaviour
     }
 
     private void ProcessDeletedCompany(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessCompanyOwner(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessNewCompany(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessDeletedDepartment(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
-
-
     private void ProcessHeadOfDepartment(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessNewDepartmentResponse(string rawResponse){
         getCompanyDepartments();
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessCompanies(string rawResponse){      
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log("COMPANIES");
-        Debug.Log(data);
-        
-
         foreach(KeyValuePair<string,JSONNode> entry in data["result"]){
             companies[entry.Value["id"]]=entry.Value["name"];
         }
-
         setCompanies(companiesDropdown,companies);
         setCompanies(_companiesDropdown,companies);
         setCompanies(__companiesDropdown,companies);
-
     }
 
     private void ProcessDeletedUser(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessEditedUser(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
 
     private void ProcessUserInfo(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
-
+        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);       
         _firstName.placeholder.GetComponent<Text>().text =data["result"]["firstName"];
         _surname.placeholder.GetComponent<Text>().text =data["result"]["surname"];
         _email.placeholder.GetComponent<Text>().text =data["result"]["email"];
-
     }
-
 
     private void ProcessUsersResponse(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log("USERS");
-        Debug.Log(data);
-
         foreach(KeyValuePair<string,JSONNode> entry in data["result"]){
             workers[entry.Value["id"]]=entry.Value["firstName"]+" "+entry.Value["surname"];
-            Debug.Log(workers[entry.Value["id"]]);
         }
-
         setUsers(usersDropdown, workers);
         setUsers(_usersDropdown, workers);
         setUsers(__usersDropdown, workers);
         setUsers(___usersDropdown, workers);
         setUserPlaceholders(0);
-  
     }
     
     private void ProcessNewUserResponse(string rawResponse){
-        JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log(data);
     }
 
     private void ProcessCompanyDepartments(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log("DEPARTMENTS");
-        Debug.Log(data);
 
         foreach(KeyValuePair<string,JSONNode> entry in data["result"]){
-            companyDepartments[entry.Value["id"]]=entry.Value["name"];
-            Debug.Log(companyDepartments[entry.Value["id"]]);
+            companyDepartments[entry.Value["id"]]=entry.Value["name"];    
         }
         setDepartments(departmentsDropdown,companyDepartments);
         setDepartments(_departmentsDropdown,companyDepartments);
-        setDepartments(__departmentsDropdown,companyDepartments);
-        
-        setRoles(roleDropdown);
-     
+        setDepartments(__departmentsDropdown,companyDepartments);      
+        setRoles(roleDropdown);   
     }
 
     private void setCompanies(Dropdown dropdown, Dictionary<int, string> _companies){
@@ -397,7 +351,6 @@ public class WorkersScene : MonoBehaviour
         }  
         dropdown.ClearOptions();
         dropdown.AddOptions(values);
-
     }
 
     private void setUsers(Dropdown dropdown, Dictionary<int, string> _workers){
@@ -419,9 +372,6 @@ public class WorkersScene : MonoBehaviour
 
     private void setRoles(Dropdown dropdown){
         List<string> values = new List<string>();
-
-        //if company owner => add all
-        //if head => only user
 
         if(MainScene.userRole==1){
             foreach (KeyValuePair<int, string> entry in roles){
@@ -601,9 +551,7 @@ public class WorkersScene : MonoBehaviour
     // create company panel
     public void createCompany(){
         string name = companyName.text;
-        Debug.Log("COMPANY NAME: " + name);
-        StartCoroutine(Web.PostRequest(Web.createCompany(MainScene.token,name ), "e", Web.REQUEST.CREATE_COMPANY));
-        
+        StartCoroutine(Web.PostRequest(Web.createCompany(MainScene.token,name ), "e", Web.REQUEST.CREATE_COMPANY));    
     }
     public void showCreateCompanyPanel(){
         closePanels();

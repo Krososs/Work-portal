@@ -25,17 +25,13 @@ public class LoginScene : MonoBehaviour
     public static string email {get; set;}
     public static string password {get; set;}
    
-    
     public void OnClick(){
 
         string HashedPass= ComputeSha256Hash(password);
         User user = new User();
         user.email=email;
         user.password=password;
-        Debug.Log(user);
-        Debug.Log(JsonUtility.ToJson(user));
-        StartCoroutine(Web.PostRequest(Web.LOGIN_ADDRESS, JsonUtility.ToJson(user),Web.REQUEST.LOGIN)); 
-       
+        StartCoroutine(Web.PostRequest(Web.LOGIN_ADDRESS, JsonUtility.ToJson(user),Web.REQUEST.LOGIN));     
     }
 
     public void Email(string s){
@@ -73,7 +69,5 @@ public class LoginScene : MonoBehaviour
     public void Exit(){
         Application.Quit();
     }
-
-
-    
+  
 }

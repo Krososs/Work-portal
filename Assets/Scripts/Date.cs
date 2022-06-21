@@ -5,18 +5,12 @@ using UnityEngine;
 
 public class Date : MonoBehaviour
 {
-
-
     public static string dateTimeToString(string date){
         DateTime Date = System.DateTime.Parse(date,System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-        Debug.Log("SUper date");
-        Debug.Log(date);
-        Debug.Log(Date.Month);
-        Debug.Log(Date.Year);
-        Debug.Log(Date.Day);
 
         string d=Date.Year+"-";
         d+= Date.Month < 10 ? "0"+Date.Month.ToString() : Date.Month.ToString();
+        d+="-";
         d+= Date.Day < 10 ? "0"+Date.Day.ToString() : Date.Day.ToString();
         return d;
     }
@@ -73,8 +67,5 @@ public class Date : MonoBehaviour
             default:
                 return -1;
         }
-    }
-
-    
- 
+    } 
 }

@@ -22,7 +22,6 @@ public class VacationsScene : MonoBehaviour
     public GameObject newRequestPanel;
     public GameObject error;
 
-
     public Dropdown start_day;
     public Dropdown start_month;
     public Dropdown start_year;
@@ -68,10 +67,7 @@ public class VacationsScene : MonoBehaviour
         newRequestPanel.gameObject.SetActive(false);
         error.gameObject.SetActive(false);  
         requestType=1; //default   
-        myRequests=true; //my requests
-        // MainScene.token="00ca68f8f5874f8a9740ff7184cd8f59";
-        // MainScene.userRole=1;
-        // MainScene.isAdmin=true;
+        myRequests=true;
         initialRequestContainerSize=new Vector2(requestsContainer.GetComponent<RectTransform>().rect.width,requestsContainer.GetComponent<RectTransform>().rect.height);
         getUserRequests();     
     }
@@ -133,10 +129,7 @@ public class VacationsScene : MonoBehaviour
 
     private void ProcessRequestsToApproveResponse(string rawResponse){
         JSONNode data = SimpleJSON.JSON.Parse(rawResponse);
-        Debug.Log("REQUESTS TO APPROVE");
-        Debug.Log(data);
         showWorkersRequests(data);
-
     }
 
     private void ProcessRequestResponse(string rawResponse){
@@ -189,14 +182,12 @@ public class VacationsScene : MonoBehaviour
     public void getWorkersRequests(){
 
         if(myRequests){
-            //button text = My requests
             myRequests=false;
             workersRequestsButton.GetComponentInChildren<Text>().text ="My requests";
             StartCoroutine(Web.GetRequest(Web.GET_REQUESTS_FOR_APPROVE+MainScene.token,Web.REQUEST.GET_REQUESTS_FOR_APPROVE));
         }
         else{
             myRequests=true;
-            //button text = Workers requests
             workersRequestsButton.GetComponentInChildren<Text>().text ="Workers requests";
             StartCoroutine(Web.GetRequest(Web.VACATION+MainScene.token,Web.REQUEST.GET_USER_REQUESTS));
         }
@@ -222,7 +213,7 @@ public class VacationsScene : MonoBehaviour
 
 
                 text1.GetComponent<Text>().text =entry.Value["id"]+". "+vacationTypeToString(entry.Value["type"]) +" ("+entry.Value["firstName"]+" "+entry.Value["lastName"]+")";
-                text2.GetComponent<Text>().text ="Start: "+Date.dateTimeToString(entry.Value["startDate"]) +" - "+"End: "+ Date.dateTimeToString(entry.Value["endDate"]); //Start: 2022.05.19   End: 2022.05.19
+                text2.GetComponent<Text>().text ="Start: "+Date.dateTimeToString(entry.Value["startDate"]) +" - "+"End: "+ Date.dateTimeToString(entry.Value["endDate"]);
                 requestId.GetComponent<Text>().text = entry.Value["id"];
                 _requestId.GetComponent<Text>().text = entry.Value["id"];
 

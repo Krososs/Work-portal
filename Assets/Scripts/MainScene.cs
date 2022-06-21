@@ -40,7 +40,6 @@ public class MainScene : MonoBehaviour
 
    
     void Start(){
-        Debug.Log(token);
         username.text=email;  
         getUserInfo();
         getLastStatus();
@@ -67,6 +66,10 @@ public class MainScene : MonoBehaviour
             workersButton.gameObject.SetActive(false);
         }
 
+        if(isAdmin){
+            workersButton.gameObject.SetActive(true);
+        }
+
         if(statisticsReady){
             statisticsReady=false;
             setStatistics();
@@ -84,7 +87,7 @@ public class MainScene : MonoBehaviour
         double h = statistics["result"]["sumOfWorkTime"];
         double min = statistics["result"]["sumOfWorkTime"] %1.0;
 
-        stats1.text= "Work time: " + Math.Floor(h)+" hours " + Math.Floor(min*60.0) +" mins"; // /100 *60
+        stats1.text= "Work time: " + Math.Floor(h)+" hours " + Math.Floor(min*60.0) +" mins";
         stats2.text= "Working days: " + statistics["result"]["workingDays"];
         stats3.text= "Vacation days: " + statistics["result"]["vacationDays"];
     }
@@ -100,41 +103,25 @@ public class MainScene : MonoBehaviour
     public static void ProcessUserInfo(string rawRespone){
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         userId=data["result"]["id"];
-        Debug.Log("USER_INFO");
-        Debug.Log(data);
     }
 
     public static void ProcessStatistics(string rawRespone){
-
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         statistics=data;
         statisticsReady=true;
-        Debug.Log("STATISTICS");
-        
-
-
     }
 
     public static void ProcessRoleInfo(string rawRespone){
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
-        Debug.Log("ROLE_INFO");
-        Debug.Log(data);
         userRole=data["result"]["role"];
         companyId=data["result"]["companyId"];
         departamentId=data["result"]["departamentId"];
         isAdmin=data["result"]["isAdmin"];
-
-        
-
     }
-
 
     public static void ProcessLasStatus(string rawRespone){
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
-        Debug.Log("STATUS");
-        Debug.Log(data["result"]["type"]);   
-        currentStatus=data["result"]["type"];
-        
+        currentStatus=data["result"]["type"];    
         if(currentStatus==null)
             currentStatus=3;
     }
@@ -195,6 +182,4 @@ public class MainScene : MonoBehaviour
     public void Exit(){
         Application.Quit();
     }
-  
-
 }

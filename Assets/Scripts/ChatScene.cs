@@ -105,8 +105,6 @@ public class ChatScene : MonoBehaviour
         search.gameObject.SetActive(false);
         choosenUserId = "";
         choosenChatId = "";
-        // MainScene.token="5634992f9e354cb489fd5e9728be555b";
-        // MainScene.userId="13"; 
         fristSearch=true;
         timeToRefresh = 2;
         startUUID = null;
@@ -160,7 +158,6 @@ public class ChatScene : MonoBehaviour
         else
         {
             getStatus();
-            //saveMessagesHistory();
             timeToRefresh = 2;
         }
 
@@ -175,12 +172,6 @@ public class ChatScene : MonoBehaviour
         }else{
             fristSearch=true;
         }
-
-        // if(usersLoaded){
-        //     usersLoaded=false;
-        //     
-        // }
-
     }
 
     public static void setRequestInfo(Web.REQUEST type, string rawRespone){
@@ -228,9 +219,6 @@ public class ChatScene : MonoBehaviour
     void ProcessSearchResultResponse(string rawRespone)
     {
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
-        Debug.Log("Search result");
-        Debug.Log(data);
-
         clearSearchResults();
 
         int resultCounter = 0;
@@ -297,20 +285,14 @@ public class ChatScene : MonoBehaviour
         foreach (KeyValuePair<string, JSONNode> entry in data["result"])
         {
             
-            Debug.Log("CHAT");
-            Debug.Log(entry);
             string chatName = "";
             string companyName = "";
             string departamentName = "";
 
             int usersCounter = 0;
             foreach (KeyValuePair<string, JSONNode> user in entry.Value["description"]["users"])
-            {
-                
-                if(user.Value["id"].ToString()!=MainScene.userId){
-                    Debug.Log("Inny user");
-                    Debug.Log(user.Value["id"]);
-                    Debug.Log(MainScene.userId);
+            {           
+                if(user.Value["id"].ToString()!=MainScene.userId){                
                     chatName = user.Value["firstName"] + " " + user.Value["surname"] + " ";
                     companyName = user.Value["companyName"];
                     departamentName = user.Value["departmentName"];
@@ -319,8 +301,12 @@ public class ChatScene : MonoBehaviour
             }
 
             if (usersCounter > 2)
-            {
-                chatName = "Group chat";
+            {               
+                if(entry.Value["description"]["department"]==null){
+                    chatName = "Company chat";
+                }else{
+                    chatName = "Department chat";
+                }
             }
 
             GameObject username = Instantiate(usernameContent, new Vector3(0, 0, 0), Quaternion.identity);
@@ -334,7 +320,12 @@ public class ChatScene : MonoBehaviour
 
             username.GetComponent<Text>().text = chatName;
             company.GetComponent<Text>().text = "Company - " + companyName;
-            department.GetComponent<Text>().text = "Department - " + departamentName;
+
+            if(entry.Value["description"]["department"]!=null){
+                
+                department.GetComponent<Text>().text = "Department - " + departamentName;
+            }
+            
             _userid.GetComponent<Text>().text = "";
             chatid.GetComponent<Text>().text = entry.Value["chat"]["id"];
 
@@ -362,9 +353,6 @@ public class ChatScene : MonoBehaviour
 
     void ProcessMessagesResponse(string rawRespone)
     {
-        Debug.Log("MESSAGES");
-        Debug.Log(SimpleJSON.JSON.Parse(rawRespone));
-
         saveMessages(SimpleJSON.JSON.Parse(rawRespone));
         loadUsersInfo(SimpleJSON.JSON.Parse(rawRespone));
         showMessages();
@@ -378,14 +366,9 @@ public class ChatScene : MonoBehaviour
         Dictionary<string, JSONNode> newMessages = new Dictionary<string, JSONNode>();
         Dictionary<string, System.DateTime> timeStamps = new Dictionary<string, System.DateTime>();
 
-        Debug.Log("UNREAD MESSAGES");
-        Debug.Log(data);
-
         foreach (KeyValuePair<string, JSONNode> entry in data["result"]["messages"])
-        {
-            
+        {        
             System.DateTime date = System.DateTime.Parse(entry.Value["timestamp"], System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-            Debug.Log(date);
             timeStamps[entry.Value["uuid"]] = date;
         }
 
@@ -405,14 +388,12 @@ public class ChatScene : MonoBehaviour
         {
             endUUID = entry.Value["uuid"];
             showNewMessage(entry);
-
         }
         setStatus();
     }
 
     void ProcessStatusRespone(string rawRespone)
     {
-
         JSONNode data = SimpleJSON.JSON.Parse(rawRespone);
         foreach (KeyValuePair<string, JSONNode> entry in data["result"])
         {
@@ -454,7 +435,6 @@ public class ChatScene : MonoBehaviour
 
     void showMessages()
     {
-
         clearChat();
         float allMessagesHeight = 0.0F;
         string m;

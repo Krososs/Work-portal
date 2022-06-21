@@ -54,8 +54,6 @@ public class Web
         DELETE_COMPANY
     }
 
-
-
     public static IEnumerator PostRequest(string uri, string n, REQUEST type)
     {
 
